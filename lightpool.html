@@ -13,11 +13,9 @@ https://developer.mozilla.org/ja/docs/Web/CSS/CSS_Images/Using_CSS_gradients
   margin:0px 20px;
 }
 .triangle-top {
-  //background: radial-gradient(at 50% 60%, #ff4444, #aa0000);
   clip-path: polygon(0 100%, 50% 0, 100% 100%);
 }
 .triangle-bottom {
-  //background: radial-gradient(at 50% 40%, #ff4444, #aa0000);
   clip-path: polygon(0 0, 50% 100%, 100% 0);
 }
 .triangle {
@@ -27,16 +25,18 @@ https://developer.mozilla.org/ja/docs/Web/CSS/CSS_Images/Using_CSS_gradients
   margin-buttom:5px;
   margin-right:-14px;
   margin-left:-14px;
-  animation: change-color-anim 3s;
+  transition:background-color 1s;
 }
-
-@keyframes change-color-anim {
-	0%,100%{
-		background-color: #ff4500;
-	}
-	50%{
-		background-color: #7fff00;
-	}
+.child-triangle {
+  height: 100%;
+  width: 100%;
+}
+.child-triangle-top {
+  background: radial-gradient(at 50% 60%,rgba(255,255,255,0) , rgba(255,255,255,100));
+}
+.child-triangle-bottom {
+  background: radial-gradient(at 50% 40%,rgba(255,255,255,0) , rgba(255,255,255,100));
+}
 
 </style>
 
@@ -55,67 +55,68 @@ function OnLoadProc(){
 
 		// forループで要素を動的に追加しておく
 		for(ih=1;ih<=holiontalCount;ih++){
+			// 親:背景色設定
+			// 子:グラデーション付与用
 			rowContainer += "<div class=\"triangle triangle-" + ((((ih%2)+iv)%2==0)?"top":"bottom") +"\" id=\"tr"+ iv.toString() +"_"+ih.toString()+"\">";
-			rowContainer += "<div class=\"child-triangle triangle-" + ((((ih%2)+iv)%2==0)?"top":"bottom") +"\" id=\"child-tr"+ iv.toString() +"_"+ih.toString()+"\">";
+			rowContainer += "  <div class=\"child-triangle child-triangle-" + ((((ih%2)+iv)%2==0)?"top":"bottom") + "\" id=\"child-tr"+ iv.toString() +"_"+ih.toString()+"\">";
+			rowContainer += "  </div>";
 			rowContainer += "</div>";
-			rowContainer += "</div>";
+			
 		}
 		rowContainer += "</div>";
 		mainContainer.innerHTML += rowContainer;
 		rowContainer = "";
 	}
-	//setInterval(renewColor,50);
 	
-	// イベント追加
+	// mouseOverイベント追加
+	var doc_one = document.getElementsByClassName("triangle");
+	console.log(doc_one.length);
+	for(idx = 0;idx <= doc_one.length-1;idx++){
+		console.log(doc_one[idx]);
+		doc_one[idx].addEventListener('mouseover',onMouseOverFunction);
+	}
+	
+	// KeyDownイベント追加
 	document.addEventListener('keydown',onKeyPressFunction);
-	//document.addEventListener('mouseover',onMouseOverFunction);
+	
 }
 
 
-function renewColor(){
+// KeyDownイベント
+function onKeyPressFunction(event){
+	var keyName = event.key; //一応key取得
+	
+	// カウントから色相を設定してrgb取得
 	color = new HsvCode(whileCount%360, 100, 100);
-	color2 = new HsvCode(whileCount%360, 10, 100);
+	
+	// ランダムで三角を取得
 	var rtElement = document.getElementById("tr"+  (Math.floor( Math.random() * verticalCount)+1 ).toString() +"_"+(Math.floor( Math.random() * holiontalCount)+1 ).toString());
 	
-	if (rtElement.classList.contains("triangle-top")){
-		rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-	}else{
-		rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-	}
+	// 背景色設定
+	rtElement.style.background =  color.getRgbCode(true);
+	
 	whileCount++;
 }
 
-function onKeyPressFunction(event){
-	var keyName = event.key;
-	color = new HsvCode(whileCount%360, 100, 100);
-	color2 = new HsvCode(whileCount%360, 10, 100);
-	var rtElement = document.getElementById("tr"+  (Math.floor( Math.random() * verticalCount)+1 ).toString() +"_"+(Math.floor( Math.random() * holiontalCount)+1 ).toString());
-		if (rtElement.classList.contains("triangle-top")){
-		rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-	}else{
-		rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-	}
-	whileCount++;
-}
-
+//MouseOverイベント
 function onMouseOverFunction(event){
+	//console.log(event.target.id);
 	var rtElement = event.target;
-	//for (icnt=0;icnt<10;icnt++){
-		//setTimeout(function(){
-			color = new HsvCode(whileCount%360, 100, 100);
-			color2 = new HsvCode(whileCount%360, 10, 100);
-			rtElement.style.transition = "background-color 1s";
-			if (rtElement.classList.contains("triangle-top")){
-				rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-			}else if (rtElement.classList.contains("triangle-bottom")){
-				rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
-			}else {return;}
-			//rtElement.style.transition = "background-color 1s";
-			//rtElement.style.background = "white";
-		//},5);
-	//}
+	if (rtElement.classList.contains("child-triangle")) {
+		rtElement = document.getElementById(rtElement.id.replace("child-",""));
+	}else if(!rtElement.classList.contains("triangle")){
+		return;
+	}
+	
+	// カウントから色相を設定してrgb取得
+	color = new HsvCode(whileCount%360, 100, 100);
+	
+	// 背景色設定
+	rtElement.style.background =  color.getRgbCode(true);
+	
 	whileCount++;
 }
+
 
 //http://ailaby.com/rgb_hsv/
 function ColorCode() {}
@@ -150,6 +151,13 @@ ColorCode.prototype = {
 		else {
 			return code;
 		}
+	},
+	getRgba: function(alpha) {
+		//-------------------------------
+		// RGB値(#000000 - #ffffff) を返す
+		//-------------------------------
+		return "rgba(" + this.r.toString() + "," + this.g.toString() +"," + this.b.toString() + "," + alpha + ")" ;
+
 	}
 }
  
@@ -222,7 +230,7 @@ HsvCode.prototype = new ColorCode();
 </div>
 
 <form action="#" method="post">
-	<p>ユーザー名：<br>
+	<p>テキスト入力：<br>
 	<input type="text" name="name"></p>
 </form>
 
