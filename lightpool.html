@@ -1,0 +1,230 @@
+<html>
+<head>
+<title>light pool</title>
+<style type="text/css">
+/* 上三角形 */
+/*https://junpei-sugiyama.com/css-triangle/
+https://developer.mozilla.org/ja/docs/Web/CSS/CSS_Images/Using_CSS_gradients
+*/
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin:0px 20px;
+}
+.triangle-top {
+  //background: radial-gradient(at 50% 60%, #ff4444, #aa0000);
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+}
+.triangle-bottom {
+  //background: radial-gradient(at 50% 40%, #ff4444, #aa0000);
+  clip-path: polygon(0 0, 50% 100%, 100% 0);
+}
+.triangle {
+  height: 50px;
+  width: 50px;
+  margin-top:5px;
+  margin-buttom:5px;
+  margin-right:-14px;
+  margin-left:-14px;
+  animation: change-color-anim 3s;
+}
+
+@keyframes change-color-anim {
+	0%,100%{
+		background-color: #ff4500;
+	}
+	50%{
+		background-color: #7fff00;
+	}
+
+</style>
+
+<script type="text/javascript">
+
+var holiontalCount = 10;//5
+var verticalCount = 8;//8
+var whileCount=1;
+
+function OnLoadProc(){
+
+	var mainContainer = document.getElementById("mainContainer");
+	var rowContainer =""
+	for(iv=1;iv<=verticalCount;iv++){
+		rowContainer += "<div class=\"container\">";
+
+		// forループで要素を動的に追加しておく
+		for(ih=1;ih<=holiontalCount;ih++){
+			rowContainer += "<div class=\"triangle triangle-" + ((((ih%2)+iv)%2==0)?"top":"bottom") +"\" id=\"tr"+ iv.toString() +"_"+ih.toString()+"\">";
+			rowContainer += "<div class=\"child-triangle triangle-" + ((((ih%2)+iv)%2==0)?"top":"bottom") +"\" id=\"child-tr"+ iv.toString() +"_"+ih.toString()+"\">";
+			rowContainer += "</div>";
+			rowContainer += "</div>";
+		}
+		rowContainer += "</div>";
+		mainContainer.innerHTML += rowContainer;
+		rowContainer = "";
+	}
+	//setInterval(renewColor,50);
+	
+	// イベント追加
+	document.addEventListener('keydown',onKeyPressFunction);
+	//document.addEventListener('mouseover',onMouseOverFunction);
+}
+
+
+function renewColor(){
+	color = new HsvCode(whileCount%360, 100, 100);
+	color2 = new HsvCode(whileCount%360, 10, 100);
+	var rtElement = document.getElementById("tr"+  (Math.floor( Math.random() * verticalCount)+1 ).toString() +"_"+(Math.floor( Math.random() * holiontalCount)+1 ).toString());
+	
+	if (rtElement.classList.contains("triangle-top")){
+		rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+	}else{
+		rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+	}
+	whileCount++;
+}
+
+function onKeyPressFunction(event){
+	var keyName = event.key;
+	color = new HsvCode(whileCount%360, 100, 100);
+	color2 = new HsvCode(whileCount%360, 10, 100);
+	var rtElement = document.getElementById("tr"+  (Math.floor( Math.random() * verticalCount)+1 ).toString() +"_"+(Math.floor( Math.random() * holiontalCount)+1 ).toString());
+		if (rtElement.classList.contains("triangle-top")){
+		rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+	}else{
+		rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+	}
+	whileCount++;
+}
+
+function onMouseOverFunction(event){
+	var rtElement = event.target;
+	//for (icnt=0;icnt<10;icnt++){
+		//setTimeout(function(){
+			color = new HsvCode(whileCount%360, 100, 100);
+			color2 = new HsvCode(whileCount%360, 10, 100);
+			rtElement.style.transition = "background-color 1s";
+			if (rtElement.classList.contains("triangle-top")){
+				rtElement.style.background = "radial-gradient(at 50% 60%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+			}else if (rtElement.classList.contains("triangle-bottom")){
+				rtElement.style.background = "radial-gradient(at 50% 40%, " + color.getRgbCode(true) + "," + color2.getRgbCode(true) + ")";
+			}else {return;}
+			//rtElement.style.transition = "background-color 1s";
+			//rtElement.style.background = "white";
+		//},5);
+	//}
+	whileCount++;
+}
+
+//http://ailaby.com/rgb_hsv/
+function ColorCode() {}
+ColorCode.prototype = {
+	getR			: function() { return this.r; },
+	getG			: function() { return this.g; },
+	getB			: function() { return this.b; },
+	getHue			: function() { return this.hue; },
+	getSaturation	: function() { return this.saturation; },
+	getValue		: function() { return this.value; },
+	getComplementary: function() {
+		//--------
+		//  補色
+		//--------
+		var max = Math.max(this.r, this.g, this.b);
+		var min = Math.min(this.r, this.g, this.b);
+		return new RgbCode((max - this.r + min),
+                                   (max - this.g + min),
+                                   (max - this.b + min));
+	},
+	getRgbCode		: function(pre) {
+		//-------------------------------
+		// RGB値(#000000 - #ffffff) を返す
+		//-------------------------------
+		var code = ('0' + this.r.toString(16)).slice(-2) + 
+				   ('0' + this.g.toString(16)).slice(-2) + 
+				   ('0' + this.b.toString(16)).slice(-2);
+ 
+		if (pre) {
+			return '#' + code;
+		}
+		else {
+			return code;
+		}
+	}
+}
+ 
+function HsvCode(hue, saturation, value) {
+	// hue は 0 ～ 360
+	// saturation, value は 0 ～ 100
+ 
+	if (!(this instanceof HsvCode)) {
+		return new HsvCode(hue, saturation, value);
+	}
+ 
+	if (typeof hue == 'string') {
+		hue = Number(hue);
+	}
+	if (typeof saturation == 'string') {
+		saturation = Number(saturation);
+	}
+	if (typeof value == 'string') {
+		value = Number(value);
+	}
+ 
+	this.hue 		= hue;
+	this.saturation = saturation;
+	this.value 		= value;
+ 
+	var max = value * 255 / 100;
+	var min = max - ((saturation / 100) * max);
+ 
+	if (hue < 60) {
+		this.r = max;
+		this.g = (hue / 60) * (max - min) + min;
+		this.b = min;
+	}
+	else if (hue < 120) {
+		this.r = ((120 - hue) / 60) * (max - min) + min;
+		this.g = max;
+		this.b = min;
+	} 
+	else if (hue < 180) {
+		this.r = min;
+		this.g = max;
+		this.b = ((hue - 120) / 60) * (max - min) + min;
+	} 
+	else if (hue < 240) {
+		this.r = min;
+		this.g = ((240 - hue) / 60) * (max - min) + min;
+		this.b = max;
+	}
+	else if (hue < 300) {
+		this.r = ((hue - 240) / 60) * (max - min) + min;
+		this.g = min;
+		this.b = max;
+	} 
+	else {
+		this.r = max;
+		this.g = min;
+		this.b = ((360 - hue) / 60) * (max - min) + min;
+	}
+ 
+	this.r = Math.round(this.r);
+	this.g = Math.round(this.g);
+	this.b = Math.round(this.b);
+}
+HsvCode.prototype = new ColorCode();
+</script>
+
+</head>
+<body onLoad="OnLoadProc()">
+<div id="mainContainer">
+</div>
+
+<form action="#" method="post">
+	<p>ユーザー名：<br>
+	<input type="text" name="name"></p>
+</form>
+
+</body>
+</html>
